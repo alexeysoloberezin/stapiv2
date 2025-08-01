@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  strapi:
+    container_name: strapi
+    image: strapi:latest
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # HOST: ${HOST}
+      # PORT: ${PORT}
+      APP_KEYS: ${APP_KEYS}
+      JWT_SECRET: ${JWT_SECRET}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_SSL: ${DATABASE_SSL}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_ENDPOINT: https://minio.bastion-tech.ru
+      MINIO_INTERNAL_ENDPOINT: https://minio.bastion-tech.ru
+      MINIO_EXTERNAL_ENDPOINT: https://minio.bastion-tech.ru
+      MINIO_PORT: 9000
+    depends_on:
+      - postgres-bastion
+    networks:
+      - app_network
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./strapi:/srv/app
+
+  postgres-bastion:
+    image: postgres:16.4-alpine
+    container_name: postgres_container_strapi_bastion
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: url_shorter
+    ports:
+      - "7432:5432"
+    volumes:
+      - postgres_data_bastion:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+volumes:
+  postgres_data_bastion:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge
